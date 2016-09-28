@@ -37,7 +37,7 @@ describe('For a given promiseA (pA)', function(){
   function thisReturnsHi () { return 'hi'; }
   function thisThrowsErr () { throw 'err'; }
 
-  xit('.then adds a new deferral to its handler group', function(){
+  it('.then adds a new deferral to its handler group', function(){
     promiseA.then();
     expect( promiseA._handlerGroups[0].downstream instanceof Deferral ).toBe( true );
     // each handler group has its own downstream
@@ -49,7 +49,7 @@ describe('For a given promiseA (pA)', function(){
 
   // Passing this may break your .catch from chapter 3. If that happens,
   // you will have to go back and fix .catch, taking this spec into account.
-  xit('.then returns the promise from that deferral', function(){
+  it('.then returns the promise from that deferral', function(){
     var promiseB = promiseA.then();
     expect( promiseB ).toBe( promiseA._handlerGroups[0].downstream.$promise );
   });
@@ -57,10 +57,11 @@ describe('For a given promiseA (pA)', function(){
   describe('that returns promiseB (pB) via .then:', function(){
 
     // Resolution bubbles down to the first available success handler.
-    xit("if pA is resolved but has no success handler, pB is resolved with pA's value", function(){
+    it("if pA is resolved but has no success handler, pB is resolved with pA's value", function(){
       var promiseB = promiseA.then();
       deferralA.resolve( 9001 );
       // do not set state manually; 'resolve' should be called somewhere!
+      console.log('what is promiseB', promiseB)
       expect( promiseB._state ).toBe( 'resolved' );
       expect( promiseB._value ).toBe( 9001 );
     });
