@@ -20,7 +20,7 @@ class $Promise {
         if (o && o.successCb && typeof o.successCb === 'function') {
           try {
             o.downstream.resolve(o.successCb(this._value));
-          } catch(err) {
+          } catch (err) {
             o.downstream.reject(err);
           }
         } else if (o && o.downstream) {
@@ -32,6 +32,7 @@ class $Promise {
     }
   }
 
+
   reject(data) {
     if (this.isPending()) {
       this._value = data;
@@ -39,7 +40,7 @@ class $Promise {
         if (o && o.errorCb && typeof o.errorCb === 'function') {
           try {
             o.downstream.resolve(o.errorCb(this._value));
-          } catch(err) {
+          } catch (err) {
             o.downstream.reject(err);
           }
         } else if (o && o.downstream) {
@@ -110,7 +111,7 @@ class $Promise {
     return newDef.$promise;
   }
 
-  catch(rejectFunction) {
+  catch (rejectFunction) {
     return this.then(null, rejectFunction);
   }
 }
