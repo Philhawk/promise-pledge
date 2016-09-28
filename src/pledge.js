@@ -1,3 +1,5 @@
+
+
 'use strict';
 /*----------------------------------------------------------------
 Promises Workshop: build the pledge.js deferral-style promise library
@@ -15,7 +17,11 @@ class $Promise {
   }
 
   resolve( data ) {
-    if (this.isPending()){
+    if (this.isPending()){his._handlerGroups.forEach(o => {
+         if (o != null && o.successCb) {
+           o.successCb(this._value);
+           o.successCb = false;
+
       this._value = data;
        this._handlerGroups.forEach(o => {
          if (o != null && o.successCb) {
@@ -93,7 +99,7 @@ class $Promise {
       }
     }
     else {
-      this._handlerGroups.push({successCb: success, errorCb: failure, downstream: whoFuckingKnows})
+      this._handlerGroups.push(v{successCb: success, errorCb: failure, downstream: whoFuckingKnows})
     }
     return whoFuckingKnows.$promise;
   }
@@ -106,7 +112,10 @@ class $Promise {
 
 class Deferral {
 
-  constructor(){
+  constructor(){his._handlerGroups.forEach(o => {
+         if (o != null && o.successCb) {
+           o.successCb(this._value);
+           o.successCb = false;
 
     this.$promise = new $Promise(arguments[0]);
   }
@@ -121,7 +130,16 @@ class Deferral {
   }
  }
 
-function defer() {
+function defer() {his._handlerGroups.forEach(o => {
+         if (o != null && o.successCb) {
+           o.successCb(this._value);
+           o.successCb = false;his._handlerGroups.forEach(o => {
+         if (o != null && o.successCb) {
+           o.successCb(this._value);
+           o.successCb = false;his._handlerGroups.forEach(o => {
+         if (o != null && o.successCb) {
+           o.successCb(this._value);
+           o.successCb = false;
   return new Deferral();
 };
 
