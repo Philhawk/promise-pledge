@@ -6,39 +6,49 @@ Promises Workshop: build the pledge.js deferral-style promise library
 
 class $Promise {
 
-  constructor(){
+  constructor() {
     this._handlerGroups = [];
-
-    this._state = 'pending'
-    this._value = arguments[0];
-    // this._handlerIndex = -1;
+    this._state = 'pending';
+    this._value = undefined;
   }
 
-  resolve( data ) {
-    if (this.isPending()){
+
+  resolve(data) {
+    if (this.isPending()) {
       this._value = data;
-       this._handlerGroups.forEach(o => {
-         if (o != null && o.successCb) {
-           o.successCb(this._value);
-           o.successCb = false;
-         }
-       });
-       this._state = 'resolved';
-       this._handlerGroups = [];
-   }
+      this._handlerGroups.forEach(o => {
+        if (o && o.successCb && typeof o.successCb === 'function') {
+          try {
+            o.downstream.resolve(o.successCb(this._value));
+          } catch(err) {
+            o.downstream.reject(err);
+          }
+        } else if (o && o.downstream) {
+          o.downstream.resolve(this._value);
+        }
+      });
+      this._state = 'resolved';
+      this._handlerGroups = [];
+    }
   }
 
-  reject( data ) {
-    if (this.isPending()){
+  reject(data) {
+    if (this.isPending()) {
       this._value = data;
-       this._handlerGroups.forEach(o => {
-         if (o != null && o.errorCb) {
-           o.errorCb(this._value);
-           o.errorCb = false;
-         }
-       });
-       this._state = 'rejected';
-   }
+      this._handlerGroups.forEach(o => {
+        if (o && o.errorCb && typeof o.errorCb === 'function') {
+          try {
+            o.downstream.resolve(o.errorCb(this._value));
+          } catch(err) {
+            o.downstream.reject(err);
+          }
+        } else if (o && o.downstream) {
+          o.downstream.reject(this._value);
+        }
+      });
+      this._state = 'rejected';
+      this._handlerGroups = [];
+    }
   }
 
   isPending() {
@@ -46,7 +56,7 @@ class $Promise {
   }
 
   isResolved() {
-   return this._state === 'resolved'
+    return this._state === 'resolved'
   }
 
   isNotResolved() {
@@ -61,10 +71,10 @@ class $Promise {
     return this._state === 'rejected'
   }
 
-  then( resolveFn, rejectFn) {
+  then(resolveFn, rejectFn) {
     let success = resolveFn;
     let failure = rejectFn;
-    let whoFuckingKnows;// = defer();
+    let newDef = defer();
 
     if (!rejectFn || typeof rejectFn !== 'function') {
       failure = false;
@@ -72,59 +82,59 @@ class $Promise {
 
     if (!resolveFn || typeof resolveFn !== 'function') {
       success = false;
-      whoFuckingKnows = defer(this._value);
-
-    } else {
-      whoFuckingKnows = defer();
     }
+
     // console.log(`adding ${success} to handler groups`);
 
     if (this.isResolved()) {
-      if(success) {
+      if (success) {
         success(this._value);
         this._state = 'resolved';
         this._handlerGroups = [];
+        newDef.resolve(this._value);
       }
     } else if (this.isRejected()) {
       if (failure) {
         failure(this._value);
         this._state = 'rejected';
         this._handlerGroups = [];
+        newDef.reject(this._value);
       }
+    } else {
+      this._handlerGroups.push({
+        successCb: success,
+        errorCb: failure,
+        downstream: newDef
+      });
     }
-    else {
-      this._handlerGroups.push({successCb: success, errorCb: failure, downstream: whoFuckingKnows})
-    }
-    return whoFuckingKnows.$promise;
+    return newDef.$promise;
   }
 
-  catch( rejectFunction ) {
-    return this.then(null, rejectFunction)
+  catch(rejectFunction) {
+    return this.then(null, rejectFunction);
   }
-
- }
+}
 
 class Deferral {
 
-  constructor(){
+  constructor() {
 
-    this.$promise = new $Promise(arguments[0]);
+    this.$promise = new $Promise();
   }
 
-  resolve (someValue) {
+  resolve(someValue) {
     this.$promise.resolve(someValue);
     // console.log('resolving with value ', someValue);
   }
 
-  reject (someValue) {
+  reject(someValue) {
     this.$promise.reject(someValue);
   }
- }
+}
 
 function defer() {
   return new Deferral();
 };
-
 
 
 
